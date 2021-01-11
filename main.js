@@ -13,7 +13,7 @@ async function main() {
 
   await playStreamAtIndex(0)
 
-  captureBtn.addEventListener('click', (ev) => {
+  makeClickable(captureBtn, ev => {
     ev.preventDefault()
     const canvas = document.createElement('canvas')
     const context = canvas.getContext('2d')
@@ -25,27 +25,23 @@ async function main() {
     const data = canvas.toDataURL('image/jpeg')
     preview.setAttribute('src', data)
     setButtonStates('preview')
-  }, false)
-  captureBtn.disabled = false
-  switchBtn.addEventListener('click', ev => {
+  })
+  makeClickable(switchBtn, ev => {
     currentVideoInputIndex = (currentVideoInputIndex + 1) % videoInputs.length
     playStreamAtIndex(currentVideoInputIndex)
     setButtonStates('loading')
-  }, false)
-  switchBtn.disabled = false
-  redoBtn.addEventListener('click', ev => {
+  })
+  makeClickable(redoBtn, ev => {
     preview.removeAttribute('src')
     setButtonStates('camera')
-  }, false)
-  redoBtn.disabled = false
-  acceptBtn.addEventListener('click', ev => {
+  })
+  makeClickable(acceptBtn, ev => {
     const a = document.createElement('a')
     a.href = preview.src
     a.setAttribute('download', 'image.png')
     a.click()
     setButtonStates('camera')
-  }, false)
-  acceptBtn.disabled = false
+  })
 
   async function playStreamAtIndex(inputIndex) {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: videoInputs[inputIndex].deviceId }, audio: false })
@@ -69,6 +65,11 @@ function playVideo(videoElement) {
     }, false)
     videoElement.play()
   })
+}
+
+function makeClickable(button, handler) {
+  button.addEventListener('click', handler, false)
+  button.disabled = false
 }
 
 main()
