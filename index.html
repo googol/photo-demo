@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html style="width: 100%; height: 100%">
+    <head>
+        <title>Kuvademo</title>
+        <meta charset="utf-8" />
+    </head>
+    <body style="width: 100%; height: 100%">
+        <main style="position: relative; width: 100%; height: 100%">
+            <video id="video" style="object-fit: cover; position: absolute; top: 0; left: 0; width: 100%; height: 100%;">VIdeo stream not available</video>
+            <img id="preview" style="object-fit: cover; display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;" />
+            <div style="display: flex; flex-flow: column nowrap; position: absolute; bottom: 10px; right: 10px;">
+                <button id="redobutton" disabled style="display: none;">Retry</button>
+                <button id="acceptbutton" disabled style="display: none;">Accept</button>
+                <button id="startbutton" disabled>Take photo</button>
+            </div>
+        </main>
+        <script module="true">
+async function main() {
+    const vide = document.getElementById('video')
+    const preview = document.getElementById('preview')
+    const captureBtn = document.getElementById('startbutton')
+    const redoBtn = document.getElementById('redobutton')
+    const acceptBtn = document.getElementById('acceptbutton')
+
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    video.srcObject = stream
+    await playVideo(video)
+    
+    captureBtn.addEventListener('click', (ev) => {
+        ev.preventDefault()
+        const canvas = document.createElement('canvas')
+        const context = canvas.getContext('2d')
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        context.fillStyle = "#AAA"
+        context.fillRect(0, 0, canvas.width ,canvas.height)
+        context.drawImage(video, 0, 0)
+        const data = canvas.toDataURL('image/png')
+        preview.setAttribute('src', data)
+        preview.style.display = 'block'
+        captureBtn.style.display = 'none'
+        redoBtn.style.display = 'block'
+        acceptBtn.style.display = 'block'
+    }, false)
+    captureBtn.disabled = false
+    redoBtn.addEventListener('click', ev => {
+        preview.removeAttribute('src')
+        preview.style.display = 'none'
+        captureBtn.style.display = 'block'
+        redoBtn.style.display = 'none'
+        acceptBtn.style.display = 'none'
+    }, false)
+    redoBtn.disabled = false
+    acceptBtn.addEventListener('click', ev => {
+        const a = document.createElement('a')
+        a.href = preview.src
+        a.setAttribute('download', 'image.png')
+        a.click()
+        preview.style.display = 'none'
+        captureBtn.style.display = 'block'
+        redoBtn.style.display = 'none'
+        acceptBtn.style.display = 'none'
+    }, false)
+    acceptBtn.disabled = false
+}
+
+function playVideo(videoElement) {
+    return new Promise((res, rej) => {
+        videoElement.addEventListener('canplay', () => {
+            res()
+        }, false)
+        videoElement.play()
+    })
+}
+
+main()
+        </script>
+    </body>
+</html>
