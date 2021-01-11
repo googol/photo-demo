@@ -86,7 +86,7 @@ async function main() {
         context.fillStyle = "#AAA"
         context.fillRect(0, 0, canvas.width ,canvas.height)
         context.drawImage(video, 0, 0)
-        const data = canvas.toDataURL('image/png')
+        const data = canvas.toDataURL('image/jpeg')
         preview.setAttribute('src', data)
         preview.style.display = 'block'
         captureBtn.style.display = 'none'
