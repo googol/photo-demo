@@ -1,5 +1,5 @@
 async function main() {
-  const vide = document.getElementById('video')
+  const video = document.getElementById('video')
   const preview = document.getElementById('preview')
   const captureBtn = document.getElementById('startbutton')
   const switchBtn = document.getElementById('switchbutton')
@@ -10,21 +10,29 @@ async function main() {
   const videoInputs = mediaDevices.filter(device => device.kind === "videoinput")
 
   let currentVideoInputIndex = 0
+  let imageCapture = undefined
 
   await playStreamAtIndex(0)
 
-  makeClickable(captureBtn, ev => {
+  makeClickable(captureBtn, async (ev) => {
     ev.preventDefault()
-    const canvas = document.createElement('canvas')
-    const context = canvas.getContext('2d')
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
-    context.fillStyle = "#AAA"
-    context.fillRect(0, 0, canvas.width ,canvas.height)
-    context.drawImage(video, 0, 0)
-    const data = canvas.toDataURL('image/jpeg')
-    preview.setAttribute('src', data)
-    setButtonStates('preview')
+    if (imageCapture) {
+      const photoBlob = await imageCapture.takePhoto()
+      const data = URL.createObjectURL(photoBlob)
+      preview.setAttribute('src', data)
+      setButtonStates('preview')
+    } else {
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      context.fillStyle = "#AAA"
+      context.fillRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(video, 0, 0)
+      const data = canvas.toDataURL('image/jpeg')
+      preview.setAttribute('src', data)
+      setButtonStates('preview')
+    }
   })
   makeClickable(switchBtn, ev => {
     currentVideoInputIndex = (currentVideoInputIndex + 1) % videoInputs.length
@@ -46,6 +54,14 @@ async function main() {
   async function playStreamAtIndex(inputIndex) {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: videoInputs[inputIndex].deviceId }, audio: false })
     video.srcObject = stream
+
+    if (typeof ImageCapture === 'function') {
+      const track = stream.getVideoTracks()[0]
+      imageCapture = new ImageCapture(track)
+    } else {
+      imageCapture = undefined
+    }
+
     await playVideo(video)
     setButtonStates('camera')
   }
